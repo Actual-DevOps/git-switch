@@ -11,13 +11,29 @@ type Config struct {
 	Profiles []Profiles `yaml:"profiles"`
 }
 
+type Core struct {
+	Hookspath string `yaml:"hookspath"`
+}
+
 type User struct {
-	Username string `yaml:"username"`
-	Email    string `yaml:"email"`
+	Username   string `yaml:"username"`
+	Email      string `yaml:"email"`
+	Signingkey string `yaml:"signingkey"`
+}
+
+type Commit struct {
+	GPGsign string `yaml:"gpgsign"`
+}
+
+type GPG struct {
+	Program string `yaml:"program"`
 }
 
 type Git struct {
-	User User `yaml:"user"`
+	User   User   `yaml:"user"`
+	Commit Commit `yaml:"commit"`
+	GPG    GPG    `yaml:"gpg"`
+	Core   Core   `yaml:"core"`
 }
 
 type Profiles struct {
