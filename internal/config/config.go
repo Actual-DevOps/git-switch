@@ -16,7 +16,7 @@ type Core struct {
 }
 
 type User struct {
-	Username   string `yaml:"username"`
+	Name       string `yaml:"name"`
 	Email      string `yaml:"email"`
 	Signingkey string `yaml:"signingkey"`
 }
