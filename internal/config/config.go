@@ -11,9 +11,13 @@ type Config struct {
 	Profiles []Profiles `yaml:"profiles"`
 }
 
-type Git struct {
+type User struct {
 	Username string `yaml:"username"`
 	Email    string `yaml:"email"`
+}
+
+type Git struct {
+	User User `yaml:"user"`
 }
 
 type Profiles struct {
