@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -11,7 +8,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "git-switch",
-	Short: "A brief description of your application",
+	Short: "Git profile switcher",
 }
 
 func Execute() {

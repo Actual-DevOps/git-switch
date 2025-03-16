@@ -1,13 +1,11 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/Actual-DevOps/git-switch/internal/config"
-	"github.com/Actual-DevOps/git-switch/internal/gitprofile"
+	"github.com/Actual-DevOps/git-switch/internal/git"
 	"github.com/spf13/cobra"
 )
 
@@ -15,22 +13,48 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List git profiles",
 	Run: func(cmd *cobra.Command, args []string) {
-		var cfg config.Config
-		if err := config.LoadConfig(&cfg); err != nil {
-			fmt.Printf("Error load config file: %s", err)
+		conf, err := config.ReadConfig()
+		if err != nil {
+			fmt.Printf("Error read config file: %v", err)
+			os.Exit(1)
 		}
 
-		for i := range cfg.Profiles {
-			ok, err := gitprofile.IsCurrentProfile(cfg.Profiles[i].Git.User.Email)
-			if err != nil {
-				fmt.Printf("Error check current profile: %v", err)
+
+		// git.IsValidConfig(conf)
+
+		// os.Exit(1)
+
+		profiles, err := git.GetProfiles(conf)
+		if err != nil {
+			fmt.Println("Error get profile: %v", err)
+			os.Exit(1)
+		}
+
+		for i := range profiles {
+			gitProfiles, ok := profiles[i].(map[string]any)
+			if !ok {
+				fmt.Printf("Error parse profiles.git: %v", err)
+				os.Exit(1)
 			}
 
-			if ok {
-				fmt.Printf("\033[32m%d. %s - %s (current)\033[0m\n",
-					i+1, cfg.Profiles[i].Name, cfg.Profiles[i].Description)
-			} else {
-				fmt.Printf("%d. %s - %s\n", i+1, cfg.Profiles[i].Name, cfg.Profiles[i].Description)
+			gitProfilesValues, ok := gitProfiles["git"].(map[string]any)
+			if !ok {
+				fmt.Printf("Error parse profiles.git: %v", err)
+				os.Exit(1)
+			}
+
+			flagExtend, err := cmd.Flags().GetBool("extend")
+			if err != nil {
+				fmt.Println("Error parse 'extend' flag: %w", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("%d. %s - %s\n", i+1, gitProfiles["name"], gitProfiles["description"])
+
+			if flagExtend {
+				for k, v := range gitProfilesValues {
+					fmt.Printf("\t%s = \"%s\"\n", k, v)
+				}
 			}
 		}
 	},
@@ -38,4 +62,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+	listCmd.Flags().BoolP("extend", "e", false, "Show all options for profiles")
 }
