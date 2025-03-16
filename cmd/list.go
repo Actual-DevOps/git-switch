@@ -12,6 +12,23 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List git profiles",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		conf, err := config.ReadConfig()
+		if err != nil {
+			fmt.Printf("Error read config file: %v", err)
+			os.Exit(1)
+		}
+
+		validConfig, err := git.IsValidConfig(conf)
+		if err != nil {
+			fmt.Printf("Error in IsValidConfig: %v", err)
+			os.Exit(1)
+		}
+		if !validConfig {
+			fmt.Println("Config file is not valid!\n 'user.name', 'user.email' must be set")
+			os.Exit(1)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		conf, err := config.ReadConfig()
 		if err != nil {
@@ -19,14 +36,9 @@ var listCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-
-		// git.IsValidConfig(conf)
-
-		// os.Exit(1)
-
 		profiles, err := git.GetProfiles(conf)
 		if err != nil {
-			fmt.Println("Error get profile: %v", err)
+			fmt.Println("Error get profile: %w", err)
 			os.Exit(1)
 		}
 

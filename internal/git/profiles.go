@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func SetProfile(profilesGit  map[string]any, global bool) error {
+func SetProfile(profilesGit map[string]any, global bool) error {
 	for key, v := range profilesGit {
 		value, ok := v.(string)
 		if !ok {
@@ -44,24 +44,32 @@ func GetProfiles(conf string) (gitProfiles []any, err error) {
 	return gitProfiles, nil
 }
 
-// func IsCurrentProfile(profiles map[string]any)  {
+func IsCurrentProfile(profiles map[string]any) {
 
-// }
+}
 
-// func IsValidConfig(conf string) error {
-// 	profiles, err := GetProfiles(conf)
-// 	if err != nil {
-// 		return fmt.Errorf("Error get profile: %v", err)
-// 	}
+func IsValidConfig(conf string) (bool, error) {
 
-// 	gitProfiles, ok := profiles[i].(map[string]any)
-// 	if !ok {
-// 		return fmt.Errorf("Error parse profiles.git: %v", err)
-// 	}
+	profiles, err := GetProfiles(conf)
+	if err != nil {
+		return false, fmt.Errorf("Error get profile: %v", err)
+	}
 
-// 	for i := range gitProfiles {
-// 		fmt.Printf("%s\n", i)
-// 	}
+	for i := range profiles {
+		gitProfiles, ok := profiles[i].(map[string]any)
+		if !ok {
+			return false, fmt.Errorf("Error parse profiles.git: %v", err)
+		}
 
-// 	return nil
-// }
+		gitProfilesValues, ok := gitProfiles["git"].(map[string]any)
+		if !ok {
+			return false, fmt.Errorf("Error parse profiles.git: %v", err)
+		}
+
+		if gitProfilesValues["user.name"] == nil || gitProfilesValues["user.email"] == nil {
+				return false, nil
+		}
+	}
+
+	return true, nil
+}

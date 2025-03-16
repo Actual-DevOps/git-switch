@@ -15,6 +15,22 @@ var setCmd = &cobra.Command{
 	Short:   "Set git profile",
 	Example: "git-switch set 1",
 	PreRun: func(cmd *cobra.Command, args []string) {
+		conf, err := config.ReadConfig()
+		if err != nil {
+			fmt.Printf("Error read config file: %v", err)
+			os.Exit(1)
+		}
+
+		validConfig, err := git.IsValidConfig(conf)
+		if err != nil {
+			fmt.Printf("Error in IsValidConfig: %v", err)
+			os.Exit(1)
+		}
+		if !validConfig {
+			fmt.Println("Config file is not valid!\n 'user.name', 'user.email' must be set")
+			os.Exit(1)
+		}
+
 		if len(args) == 0 {
 			if err := cmd.Help(); err != nil {
 				fmt.Printf("Error print help: %v", err)
@@ -32,7 +48,7 @@ var setCmd = &cobra.Command{
 
 		profiles, err := git.GetProfiles(conf)
 		if err != nil {
-			fmt.Println("Error get profile: %v", err)
+			fmt.Println("Error get profile: %w", err)
 			os.Exit(1)
 		}
 
@@ -60,7 +76,7 @@ var setCmd = &cobra.Command{
 		}
 
 		if err := git.SetProfile(confProfilesGit, flagGlobal); err != nil {
-			fmt.Println("Error set profile: %v", err)
+			fmt.Println("Error set profile: %w", err)
 			os.Exit(1)
 		}
 	},
