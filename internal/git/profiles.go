@@ -28,7 +28,7 @@ func SetProfile(profilesGit map[string]any, global bool) error {
 		}
 
 		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("Error set git config: %v", err)
+			return fmt.Errorf("Error set git config: %w", err)
 		}
 	}
 
@@ -39,7 +39,7 @@ func GetProfiles(conf string) (gitProfiles []any, err error) {
 	var profiles map[string]any
 
 	if err := yaml.Unmarshal([]byte(conf), &profiles); err != nil {
-		return nil, fmt.Errorf("Error unmarshal config file: %v", err)
+		return nil, fmt.Errorf("Error unmarshal config file: %w", err)
 	}
 
 	gitProfiles, ok := profiles["profiles"].([]any)
@@ -55,9 +55,8 @@ func IsCurrentProfile(userEmail string) (bool, error) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		return false, fmt.Errorf("Can't run git execute: %v", err)
+		return false, fmt.Errorf("Can't run git execute: %w", err)
 	}
 
 	return strings.TrimSpace(string(out)) == fmt.Sprintf("\"%s\"", strings.TrimSpace(userEmail)), nil
 }
-

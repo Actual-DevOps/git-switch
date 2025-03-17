@@ -1,0 +1,28 @@
+run:
+  timeout: 5m
+linters:
+  enable:
+    - asciicheck
+    - copyloopvar
+    - dogsled
+    - dupl
+    - durationcheck
+    - errcheck
+    - errorlint
+    - gci
+    - gofmt
+    - goimports
+    - gosec
+    - misspell
+    - nakedret
+    - nilerr
+    - nolintlint
+    - revive
+    - typecheck
+    - unused
+    - wastedassign
+
+linters-settings:
+  gosec:
+    excludes:
+      - G114

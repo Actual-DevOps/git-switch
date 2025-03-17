@@ -12,13 +12,13 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List git profiles",
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: func(_ *cobra.Command, _ []string) {
 		if err := config.LoadAndValidateConfig(); err != nil {
 			fmt.Printf("Config error: %v", err)
 			os.Exit(1)
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		conf, err := config.ReadConfig()
 		if err != nil {
 			fmt.Printf("Error read config file: %v", err)
