@@ -3,8 +3,14 @@ package git
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"gopkg.in/yaml.v3"
+)
+
+const (
+	GreenColor = "\033[32m"
+	ResetColor = "\033[0m"
 )
 
 func SetProfile(profilesGit map[string]any, global bool) error {
@@ -44,32 +50,14 @@ func GetProfiles(conf string) (gitProfiles []any, err error) {
 	return gitProfiles, nil
 }
 
-func IsCurrentProfile(profiles map[string]any) {
+func IsCurrentProfile(userEmail string) (bool, error) {
+	cmd := exec.Command("git", "config", "user.email")
 
-}
-
-func IsValidConfig(conf string) (bool, error) {
-
-	profiles, err := GetProfiles(conf)
+	out, err := cmd.Output()
 	if err != nil {
-		return false, fmt.Errorf("Error get profile: %v", err)
+		return false, fmt.Errorf("Can't run git execute: %v", err)
 	}
 
-	for i := range profiles {
-		gitProfiles, ok := profiles[i].(map[string]any)
-		if !ok {
-			return false, fmt.Errorf("Error parse profiles.git: %v", err)
-		}
-
-		gitProfilesValues, ok := gitProfiles["git"].(map[string]any)
-		if !ok {
-			return false, fmt.Errorf("Error parse profiles.git: %v", err)
-		}
-
-		if gitProfilesValues["user.name"] == nil || gitProfilesValues["user.email"] == nil {
-				return false, nil
-		}
-	}
-
-	return true, nil
+	return strings.TrimSpace(string(out)) == fmt.Sprintf("\"%s\"", strings.TrimSpace(userEmail)), nil
 }
+

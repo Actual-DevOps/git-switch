@@ -13,19 +13,8 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List git profiles",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		conf, err := config.ReadConfig()
-		if err != nil {
-			fmt.Printf("Error read config file: %v", err)
-			os.Exit(1)
-		}
-
-		validConfig, err := git.IsValidConfig(conf)
-		if err != nil {
-			fmt.Printf("Error in IsValidConfig: %v", err)
-			os.Exit(1)
-		}
-		if !validConfig {
-			fmt.Println("Config file is not valid!\n 'user.name', 'user.email' must be set")
+		if err := config.LoadAndValidateConfig(); err != nil {
+			fmt.Printf("Config error: %v", err)
 			os.Exit(1)
 		}
 	},
@@ -45,13 +34,13 @@ var listCmd = &cobra.Command{
 		for i := range profiles {
 			gitProfiles, ok := profiles[i].(map[string]any)
 			if !ok {
-				fmt.Printf("Error parse profiles.git: %v", err)
+				fmt.Printf("Error parse gitProfiles")
 				os.Exit(1)
 			}
 
 			gitProfilesValues, ok := gitProfiles["git"].(map[string]any)
 			if !ok {
-				fmt.Printf("Error parse profiles.git: %v", err)
+				fmt.Printf("Error parse gitProfilesValues")
 				os.Exit(1)
 			}
 
@@ -61,7 +50,23 @@ var listCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			fmt.Printf("%d. %s - %s\n", i+1, gitProfiles["name"], gitProfiles["description"])
+			var startColor, resetColor string
+			for k, v := range gitProfilesValues {
+				if k == "user.email" {
+					isCurrentProfile, err := git.IsCurrentProfile(v.(string))
+					if err != nil {
+						fmt.Printf("Error IsCurrentProfile: %v", err)
+						os.Exit(1)
+					}
+
+					if isCurrentProfile {
+						startColor = git.GreenColor
+						resetColor = git.ResetColor
+					}
+				}
+			}
+
+			fmt.Printf(startColor+"%d. %s - %s\n"+resetColor, i+1, gitProfiles["name"], gitProfiles["description"])
 
 			if flagExtend {
 				for k, v := range gitProfilesValues {
